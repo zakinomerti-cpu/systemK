@@ -1,0 +1,195 @@
+
+
+/*
+	первые 256 инвоков - системные, все что выше - пользовательские
+	Что включить в системные инвоки?
+
+	1) memset
+	2) memcpy (внутрянняя-внутрянная, внешняя-внешняя и вариации)
+	3) memcmp (внутрянняя-внутрянная, внешняя-внешняя и вариации)
+	4) memdmp (внутрянняя-внутрянная, внешняя-внешняя и вариации)
+	5) memswp (внутрянняя-внешняя, внешняя-внутрянняя)
+*/
+
+$expand(vcu_opcds_generator(
+	HALT,		"HALT",		NONE,		halt_handler,
+	INVK,		"INVK",		DWORD,		invk_handler,
+	MOV,		"MOV",		RR,			mov_handler,
+	MOVI,		"MOVI",		R_DWORD,	movi_handler,
+	PUSH,		"PUSH",		R,			push_handler,
+	PSHI,		"PSHI",		DWORD,		pushi_handler,
+	POP,		"POP",		R,			pop_handler,
+	DUP,		"DUP",		NONE,		Dup_handler,
+	SWP,		"SWP",		NONE,		swap_handler,
+	ADD,		"ADD",		RR,			add_handler,
+	SUB,		"SUB",		RR,			sub_handler,
+	MUL,		"MUL",		RR,			mul_handler,
+	DIV,		"DIV",		RR,			Div_handler,
+	MOD,		"MOD",		RR,			mod_handler,
+	ADDI,		"ADDI",		R_DWORD,	addi_handler,
+	SUBI,		"SUBI",		R_DWORD,	subi_handler,
+	MULI,		"MULI",		R_DWORD,	muli_handler,
+	DIVI,		"DIVI",		R_DWORD,	divi_handler,
+	INC,		"INC",		R,			inc_handler,
+	DEC,		"DEC",		R,			Dec_handler,
+	NEG,		"NEG",		R,			neg_handler,
+	AND,		"AND",		RR,			and_handler,
+	OR,			"OR",		RR,			or_handler,
+	XOR,		"XOR",		RR,			xor_handler,
+	NOT,		"NOT",		R,			not_handler,
+	SHL,		"SHL",		RR,			shl_handler,
+	SHR,		"SHR",		RR,			shr_handler,
+	CMP,		"CMP",		RR,			cmp_handler,
+	CMPI,		"CMPI",		R_DWORD,	cmpi_handler,
+	JMP,		"JMP",		DWORD,		jmp_handler,
+	JP,			"JP",		DWORD,		jp_handler,
+	JZ,			"JZ",		DWORD,		jz_handler,
+	JN,			"JN",		DWORD,		jn_handler,
+	CALL,		"CALL",		DWORD,		call_handler,
+	RET,		"RET",		NONE,		ret_handler,
+	LD,			"LD",		R_DWORD,	load_handler,
+	ST,			"ST",		DWORD_R,	store_handler,
+	LDB,		"LDB",		R_DWORD,	loadb_handler,
+	STB,		"STB",		DWORD_R,	storeb_handler,
+	LDR,		"LDR",		RR,			load_handler_rr,
+	STR,		"STR",		RR,			store_handler_rr,
+	LDBR,		"LDBR",		RR,			loadb_handler_rr,
+	STBR,		"STBR",		RR,			storeb_handler_rr,
+	_LD,		"_LD",		R_DWORD,	e_load_handler,
+	_ST,		"_ST",		DWORD_R,	e_store_handler,
+	_LDB,		"_LDB",		R_DWORD,	e_loadb_handler,
+	_STB,		"_STB",		DWORD_R,	e_storeb_handler,
+	_LDR,		"_LDR",		RR,			e_load_handler_rr,
+	_STR,		"_STR",		RR,			e_store_handler_rr,
+	_LDBR,		"_LDBR",	RR,			e_loadb_handler_rr,
+	_STBR,		"_STBR",	RR,			e_storeb_handler_rr,
+
+
+
+
+
+	/*
+		FSET	key, value64	: slot[key] = double constant
+		FSTR	key, reg		: slot[key] = numeric conversion of reg
+		FGET	reg, key		: reg = numeric conversion of slot[key]
+		FGTR	dst, keyreg	: dst = numeric conversion of slot[regs[keyreg]]
+
+		FxxxR key, reg		: slot[key] op= numeric conversion of reg
+		FxxxF dst, src		: slot[dst] op= slot[src]
+
+		Unary functions:
+		FNEG / FABS / FSQRT / FSIN / FCOS / FTAN / FFLOOR / FCEIL
+		
+		dst, src: slot[dst] = function(slot[src])
+	*/
+	FNVK,		"FNVK",		DWORD,			fnvk_handler,
+	FSET,		"FSET",		DWORD_QWORD,	fset_handler,
+	FSTR,		"FSTR",		DWORD_R,		fstr_handler,
+	FMOV,		"FMOV",		DWORD_DWORD,	fmov_handler,
+	FGET,		"FGET",		R_DWORD,		fget_handler,
+	FGTR,		"FGTR",		RR,				fgtr_handler,
+	FNME,		"FNME",		R_DWORD,		fnme_handler,
+	FADDR,		"FADDR",	DWORD_R,		faddr_handler,
+	FSUBR,		"FSUBR",	DWORD_R,		fsubr_handler,
+	FMULR,		"FMULR",	DWORD_R,		fmulr_handler,
+	FDIVR,		"FDIVR",	DWORD_R,		fdivr_handler,
+	FMODR,		"FMODR",	DWORD_R,		fmodr_handler,
+	FADDF,		"FADDF",	DWORD_DWORD,	faddf_handler,
+	FSUBF,		"FSUBF",	DWORD_DWORD,	fsubf_handler,
+	FMULF,		"FMULF",	DWORD_DWORD,	fmulf_handler,
+	FDIVF,		"FDIVF",	DWORD_DWORD,	fdivf_handler,
+	FMODF,		"FMODF",	DWORD_DWORD,	fmodf_handler,
+	FCMPR,		"FCMPR",	DWORD_R,		fcmpr_handler,
+	FCMPF,		"FCMPF",	DWORD_DWORD,	fcmpf_handler,
+	FNEG,		"FNEG",		DWORD_DWORD,	fneg_handler,
+	FABS,		"FABS",		DWORD_DWORD,	fabs_handler,
+	FSQRT,		"FSQRT",	DWORD_DWORD,	fsqrt_handler,
+	FSIN,		"FSIN",		DWORD_DWORD,	fsin_handler,
+	FCOS,		"FCOS",		DWORD_DWORD,	fcos_handler,
+	FTAN,		"FTAN",		DWORD_DWORD,	ftan_handler,
+	FFLOOR,		"FFLOOR",	DWORD_DWORD,	ffloor_handler,
+	FCEIL,		"FCEIL",	DWORD_DWORD,	fceil_handler,
+	FPOW,		"FPOW",		DWORD_DWORD,	fpow_handler,
+
+
+
+
+	/* matrix compute unit opcode block */
+	MNVK,		"MNVK",		DWORD,			mnvk_handler,
+	MDEL,		"MDEL",		DWORD,			mdel_handler,
+	MCOPY,		"MCOPY",	DWORD_DWORD,	mcopy_handler,
+	MZERO,		"MZERO",	DWORD,			mzero_handler,
+	MIDENT,		"MIDENT",	DWORD,			mident_handler,
+	MTRANS,		"MTRANS",	DWORD_DWORD,	mtrans_handler,
+));
+
+enum finvoke_operation {
+	FINV_ASIN	= 0x00,
+	FINV_ACOS	= 0x01,
+	FINV_ATAN	= 0x02,
+	FINV_ATAN2	= 0x03,
+	FINV_EXP	= 0x04,
+	FINV_LOG	= 0x05,
+	FINV_LOG2	= 0x06,
+	FINV_LOG10	= 0x07,
+	FINV_TRUNC	= 0x08,
+	FINV_ROUND	= 0x09
+};
+
+
+/*
+MNVK argument contracts:
+
+CREATE:
+	r0 = matrix ID
+	r1 = rows
+	r2 = columns
+	Создать матрицу, заполненную нулями.
+
+SET:
+	r0 = matrix ID
+	r1 = row
+	r2 = column
+	r3 = source float-slot key
+
+GET:
+	r0 = matrix ID
+	r1 = row
+	r2 = column
+	r3 = destination float-slot key
+
+COPY_ELEM / SWAP_ELEM:
+	r0 = destination matrix ID
+	r1 = destination row
+	r2 = destination column
+	r3 = source matrix ID
+	r4 = source row
+	r5 = source column
+
+ADD / SUB / MUL:
+	r0 = destination matrix ID
+	r1 = matrix A ID
+	r2 = matrix B ID
+
+SCALE:
+	r0 = destination matrix ID
+	r1 = source matrix ID
+	r2 = scalar float-slot key
+
+Common:
+	out = error code; 0 means success.
+	Argument registers remain unchanged.
+	Destination matrices must already exist and have suitable dimensions.
+*/
+enum minvoke_operation {
+	MINV_CREATE	= 0x00,
+	MINV_SET		= 0x01,
+	MINV_GET		= 0x02,
+	MINV_COPY_ELEM	= 0x03,
+	MINV_SWAP_ELEM	= 0x04,
+
+	MINV_ADD		= 0x05,
+	MINV_SUB		= 0x06,
+	MINV_SCALE		= 0x07,
+	MINV_MUL		= 0x08
+};
