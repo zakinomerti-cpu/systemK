@@ -21,7 +21,7 @@ import std::time;
 fn int main(String[] args)
 {
 	Ram ram;
-	ram.init(81920);
+	ram.init();
 
 	Display dsp;
 	dsp.init(ram.ptr+0x0400, ram.ptr+0x1400);
@@ -36,7 +36,7 @@ fn int main(String[] args)
 		OpcodeId.STOREB.ordinal, 0x00, 0x04, 0x00, 0x00, 0,
 	};
 	for(int i = 0; i < program.len; i+=1) {
-		p.memory.add_byte(program[i]);
+		p.memory.set((uint)i, program[i]);
 	}
 
 	dsp.switchMode('t');
@@ -67,5 +67,7 @@ fn int main(String[] args)
 
 	io::printf("%p\n", p);
 	p.regs_dump(-1);
+
+	io::printn(ram::MMAP_MSTR);
 	return 0;
 } 
